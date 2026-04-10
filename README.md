@@ -50,4 +50,4 @@ exec-once = ~/.local/bin/hyprland-per-window-layout
 Optional. See [configuration.md](configuration.md) for setting default layouts per application. It also includes information on configuring **Waybar**
 
 
-Tested on Hyprland v0.50.
+Tested on Hyprland v0.54.
