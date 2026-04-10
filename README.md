@@ -1,4 +1,4 @@
-# WARNING!
+# ‼️WARNING‼️
 This repository is a modified version of an existing open-source project. It was recreated independently rather than forked in order to avoid directly linking to the original repository, whose contents include topics that may be subject to legal or regional restrictions.
 
 The goal of this repository is purely technical: to adapt and improve the functionality of the original codebase for personal use. All modifications are focused on code, structure, and usability.
