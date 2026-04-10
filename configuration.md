@@ -61,3 +61,60 @@ keyboards = [
     "firefox",
 ]
 ```
+
+## Layout file
+
+The program can write the current layout name to a file every time the layout changes. This is useful for displaying the active layout in a status bar (e.g. Waybar) by simply reading a file.
+
+The file always contains a single line with the short XKB layout name, for example:
+```
+us
+```
+
+This feature works automatically with no configuration needed. By default the file is written to:
+```
+~/.cache/kb_layout
+```
+
+To use a different path, set `kb_layout_file` in your `options.toml`:
+
+```toml
+kb_layout_file = "~/.cache/kb_layout"
+```
+
+The path supports `~/` expansion. The file is created automatically if it does not exist.
+
+### Example: Waybar integration
+
+Add a custom module to your Waybar config (`~/.config/waybar/config`):
+
+```json
+"custom/layout": {
+    "exec": "cat $HOME/.cache/kb_layout",
+    "interval": 1,
+    "format": " {}"
+}
+```
+
+Or use `inotify-tools` for instant updates without polling:
+
+```json
+"custom/layout": {
+	"exec": "cat $HOME/.cache/kb_layout",
+    "signal": 8,
+    "format": " {}"
+}
+```
+You should run script for this:
+
+`KbLayoutWathcer.sh`
+```bash  
+#!/usr/bin/env bash
+
+FILE="$HOME/.cache/kb_layout"
+
+while inotifywait -e close_write "$FILE"; do
+    pkill -RTMIN+8 waybar
+done
+```
+And use `exec-once = KbLayoutWathcer.sh &` at system startup

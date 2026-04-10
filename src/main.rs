@@ -4,7 +4,10 @@ use std::io::BufReader; // read unix socket
 use std::os::unix::net::UnixStream;
 
 mod hyprland_event; // work with message from socket
-use hyprland_event::{event, fullfill_keyboards_list, fullfill_layouts_list, hyprctl};
+use hyprland_event::{
+    event, fullfill_keyboards_list, fullfill_layouts_list, hyprctl, set_layout_file_path,
+    set_short_layouts,
+};
 
 mod options; // read options.toml
 use options::read_options;
@@ -129,6 +132,28 @@ fn kb_file_isset() -> bool {
     }
 }
 
+// get short layout names (e.g. ["us", "ru"]) from hyprctl input:kb_layout option
+fn get_short_layout_names() -> Vec<String> {
+    match hyprctl(["getoption", "input:kb_layout", "-j"].to_vec()) {
+        Ok(output) => {
+            let json: serde_json::Value = match serde_json::from_str(&output) {
+                Ok(j) => j,
+                Err(_) => return Vec::new(),
+            };
+            if json.is_null() || json["str"].is_null() {
+                return Vec::new();
+            }
+            let kb_layout = str::replace(json["str"].to_string().trim(), "\"", "");
+            if !kb_layout.is_empty() {
+                kb_layout.split(',').map(|s| s.trim().to_string()).collect()
+            } else {
+                Vec::new()
+            }
+        }
+        Err(_) => Vec::new(),
+    }
+}
+
 // get default layout from cli command "hyprctl devices -j"
 // value of ['keyboards'][0]['active_keymap']
 fn get_default_layout_name() -> bool {
@@ -197,6 +222,29 @@ fn main() {
         println!("You don't need this program if you have only 1 keyboard layout");
         std::process::exit(1);
     }
+
+    // read options and initialise layout-file globals
+    let opt_for_init = read_options();
+    let layout_file_path = match &opt_for_init.kb_layout_file {
+        Some(path) => {
+            // expand leading ~/ to home directory
+            if path.starts_with("~/") {
+                dirs::home_dir()
+                    .map(|h| h.join(&path[2..]).to_string_lossy().to_string())
+                    .unwrap_or_else(|| path.clone())
+            } else {
+                path.clone()
+            }
+        }
+        None => {
+            // default: ~/.cache/kb_layout
+            dirs::cache_dir()
+                .map(|d| d.join("kb_layout").to_string_lossy().to_string())
+                .unwrap_or_default()
+        }
+    };
+    set_layout_file_path(layout_file_path);
+    set_short_layouts(get_short_layout_names());
     let mut attempts = 0;
     const MAX_ATTEMPTS: u32 = 30; // 30 second timeout
     while !get_default_layout_name() {

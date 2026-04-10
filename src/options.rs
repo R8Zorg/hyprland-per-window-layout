@@ -11,6 +11,7 @@ use toml::Table;
 pub struct Options {
     pub keyboards: Vec<String>, // list of keyboards to switch layouts on
     pub default_layouts: HashMap<u16, Vec<String>>, // default layouts for window classes
+    pub kb_layout_file: Option<String>, // path to file where current layout name is written
 }
 
 // function to read the options file toml
@@ -33,6 +34,7 @@ pub fn read_options() -> Options {
                     return Options {
                         keyboards: Vec::new(),
                         default_layouts: HashMap::new(),
+                        kb_layout_file: None,
                     };
                 }
             };
@@ -43,6 +45,7 @@ pub fn read_options() -> Options {
                     return Options {
                         keyboards: Vec::new(),
                         default_layouts: HashMap::new(),
+                        kb_layout_file: None,
                     };
                 }
             };
@@ -76,9 +79,14 @@ pub fn read_options() -> Options {
                     }
                 }
             }
+            let kb_layout_file = _t
+                .get("kb_layout_file")
+                .and_then(|v| v.as_str())
+                .map(|s| s.to_string());
             return Options {
                 keyboards,
                 default_layouts: map,
+                kb_layout_file,
             };
         }
         Err(_) => {
@@ -88,5 +96,6 @@ pub fn read_options() -> Options {
     Options {
         keyboards: Vec::new(),
         default_layouts: HashMap::new(),
+        kb_layout_file: None,
     }
 }

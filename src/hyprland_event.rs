@@ -26,6 +26,10 @@ lazy_static! {
     static ref ACTIVE_CLASS: Mutex<String> = Mutex::new(String::new());
     // current active layout index
     static ref ACTIVE_LAYOUT: Mutex<u16> = Mutex::new(0);
+    // short layout names (e.g. ["us", "ru"]) by index, from input:kb_layout
+    static ref SHORT_LAYOUTS: Mutex<Vec<String>> = Mutex::new(Vec::new());
+    // path to the file where the current layout name is written
+    static ref LAYOUT_FILE_PATH: Mutex<String> = Mutex::new(String::new());
 }
 
 // work with messages from hyprland socket
@@ -171,6 +175,7 @@ pub fn event(name: &str, data: &str, options: &Options) {
                     if let Ok(mut active_layout_ref) = ACTIVE_LAYOUT.lock() {
                         *active_layout_ref = index;
                     }
+                    write_layout_file(index);
                     let addr = match ACTIVE_WINDOW.lock() {
                         Ok(window) => window.clone(),
                         Err(_) => return,
@@ -232,6 +237,8 @@ fn change_layout(index: u16) {
     if let Ok(mut active_layout) = ACTIVE_LAYOUT.lock() {
         *active_layout = index;
     }
+    // write the file immediately — before hyprctl round-trips
+    write_layout_file(index);
     let mut kb_index = 0;
     let mut trash: Vec<usize> = Vec::new();
     for kb in keyboards.iter() {
@@ -292,5 +299,41 @@ pub fn fullfill_keyboards_list(name: String) {
         if !keyboards.contains(&name) {
             keyboards.push(name);
         }
+    }
+}
+
+// store short layout names (e.g. ["us", "ru"]) indexed to match LAYOUTS
+pub fn set_short_layouts(names: Vec<String>) {
+    if let Ok(mut sl) = SHORT_LAYOUTS.lock() {
+        *sl = names;
+    }
+}
+
+// set the path to the file where the current layout name will be written
+pub fn set_layout_file_path(path: String) {
+    if let Ok(mut p) = LAYOUT_FILE_PATH.lock() {
+        *p = path;
+    }
+}
+
+// write the short layout name for the given index to LAYOUT_FILE_PATH
+fn write_layout_file(index: u16) {
+    let path = match LAYOUT_FILE_PATH.lock() {
+        Ok(p) => p.clone(),
+        Err(_) => return,
+    };
+    if path.is_empty() {
+        return;
+    }
+    let short_layouts = match SHORT_LAYOUTS.lock() {
+        Ok(sl) => sl.clone(),
+        Err(_) => return,
+    };
+    match short_layouts.get(index as usize) {
+        Some(name) => match std::fs::write(&path, name) {
+            Ok(_) => log::debug!("Written layout '{}' to {}", name, path),
+            Err(e) => log::warn!("Failed to write layout file {}: {}", path, e),
+        },
+        None => log::warn!("No short layout name for index {}", index),
     }
 }
