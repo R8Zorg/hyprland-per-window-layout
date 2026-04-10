@@ -1,3 +1,14 @@
+# WARNING!
+This repository is a modified version of an existing open-source project. It was recreated independently rather than forked in order to avoid directly linking to the original repository, whose contents include topics that may be subject to legal or regional restrictions.
+
+The goal of this repository is purely technical: to adapt and improve the functionality of the original codebase for personal use. All modifications are focused on code, structure, and usability.
+
+I want to make it clear that this decision is not directed against any individual, group, or viewpoint. I respect all people regardless of background, beliefs, or identity. The separation from the original repository is solely a precautionary measure to prevent potential legal or compliance issues in certain jurisdictions.
+
+The project continues to follow the terms of the original MIT License, which is preserved in this repository.
+
+If you are looking for the original work, please refer to its respective source.
+
 # Hyprland Per-Window Keyboard Layout Manager
 
 Automatic keyboard layout switching for Hyprland - each window remembers its own keyboard layout.
@@ -19,41 +30,10 @@ Automatic keyboard layout switching for Hyprland - each window remembers its own
 
 ## Installation
 
-### From [AUR](https://aur.archlinux.org/packages/hyprland-per-window-layout) (Arch Linux)
-
-```bash 
-# e.g.
-yay -Sy && yay -S hyprland-per-window-layout
-```
-
-Add to hyprland.conf:
-```
-exec-once = /usr/bin/hyprland-per-window-layout
-```
-
-### From Cargo
+### Only from Source
 
 ```bash
-cargo install hyprland-per-window-layout
-```
-
-Add to hyprland.conf:
-```
-exec-once = ~/.cargo/bin/hyprland-per-window-layout
-```
-
-### Gentoo
-
-Activate wayland overlay as described in [README](https://github.com/bsd-ac/wayland-desktop#activate-overlay-via-eselect-repository), allow **~amd64** keyword and then install it:
-
-```bash
-# emerge --ask gui-apps/hyprland-per-window-layout
-```
-
-### From Source
-
-```bash
-git clone https://github.com/coffebar/hyprland-per-window-layout.git
+git clone https://github.com/R8Zorg/hyprland-per-window-layout.git
 cd hyprland-per-window-layout
 cargo build --release
 mkdir -p ~/.local/bin/
@@ -67,6 +47,7 @@ exec-once = ~/.local/bin/hyprland-per-window-layout
 
 ## Configuration
 
-Optional. See [configuration.md](configuration.md) for setting default layouts per application.
+Optional. See [configuration.md](configuration.md) for setting default layouts per application. It also includes information on configuring **Waybar**
+
 
 Tested on Hyprland v0.50.
