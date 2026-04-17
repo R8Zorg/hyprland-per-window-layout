@@ -100,7 +100,7 @@ Or use `inotify-tools` for instant updates without polling:
 
 ```json
 "custom/layout": {
-	"exec": "cat $HOME/.cache/kb_layout",
+    "exec": "cat $HOME/.cache/kb_layout",
     "signal": 1,
     "format": " {}"
 }
@@ -117,4 +117,5 @@ while inotifywait -e close_write "$FILE"; do
     pkill -RTMIN+1 waybar
 done
 ```
+Don't forget to `chmod +x KbLayoutWathcer.sh`
 And use `exec-once = KbLayoutWathcer.sh` at system startup
